@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_cnt
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq_cnt
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics status"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  gateway:
+    build: 
+      context: ./gateway
+    container_name: gateway_cnt
+    restart: always
+    ports:
+      - 8000:8000
+    env_file:
+      - gateway/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  node_a:
+    build: 
+      context: ./node_a
+    container_name: node_a_cnt
+    restart: always
+    env_file:
+      - node_a/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  node_b:
+    build: 
+      context: ./node_b
+    container_name: node_b_cnt
+    restart: always
+    env_file:
+      - node_b/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  node_decision:
+    build: 
+      context: ./node_decision
+    container_name: node_decision_cnt
+    restart: always
+    env_file:
+      - node_decision/.env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+volumes:
+  mongodb_data:
