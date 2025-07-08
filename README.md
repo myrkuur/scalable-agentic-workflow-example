@@ -31,7 +31,7 @@ HTTP Request → Gateway → Decision Node → Processing Nodes (A/B) → Storag
 
 1. **Clone and navigate to the project:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/myrkuur/scalable-agentic-workflow-example.git
    cd demo-langMQ
    ```
 
